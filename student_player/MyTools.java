@@ -85,6 +85,51 @@ public class MyTools {
 
 }
 
+//wenwen
+    public static int pathToHiddenDis (ArrayList<student_player.Path> paths, int[] coord) {
+    		int total= 0;
+    		for (student_player.Path a: paths){
+    			total += a.manhattanDistance(coord[0],coord[1]);
+    		}
+    		return total;
+    }
+    
+    public static int disToThreeHidden(SaboteurBoardState pbs) {
+    		int credit=0;
+        int[] leftHidden= {36,10};
+        int[] middleHidden= {36,16};
+        int[] rightHidden= {36,22};
+        SaboteurTile[][] tiles = pbs.getHiddenBoard();
+        int[][] board =  pbs.getHiddenIntBoard();
+        student_player.MyTools tryy = new student_player.MyTools(board);
+        ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
+       
+        //if three hidden objectives are not visible;
+        if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
+        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one nugget is visible or the other two hidden1/2 are visible
+        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        		credit = -pathToHiddenDis(temp2, leftHidden);
+        }
+        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+    			credit = -pathToHiddenDis(temp2, middleHidden);
+        }
+        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+			credit = -pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one hidden is visible:
+        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+        		credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
+        }
+        return credit;
+    }
 
 class Path{
     public int numOnes;
@@ -133,5 +178,9 @@ class Path{
 
         }
     }
-
+    
+    public int manhattanDistance(int c, int d) {
+    		//two coordinate: (deepestEnd[0],deepestEnd[1]) (c,d)
+    		return Math.abs(deepestEnd[0]-c)+Math.abs(deepestEnd[1]-d);
+    }
 }
