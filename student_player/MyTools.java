@@ -33,7 +33,15 @@ public class MyTools {
     public static void initVisited(){
         for(int i = 0; i<BOARD_SIZE;i++){  //initialize visited array.
             for(int j=0;j<BOARD_SIZE;j++){
-                visited[i][j]=false;
+                if(j>=36 && j<=38){
+                    visited[i][j]=false;
+                    if((j>=9 && j<=11)||(j>=15 && j<=17)||(j>=21 && j<=23)){ //if it's 3 hidden cards
+                        visited[i][j]=true;
+                    }
+                } else{
+                    visited[i][j]=false;
+                }
+
             }
         }
     }
