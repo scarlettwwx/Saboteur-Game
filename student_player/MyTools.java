@@ -21,7 +21,7 @@ public class MyTools {
     }
 
     //    public final int BOARD_SIZE =  SaboteurBoardState.BOARD_SIZE;
-    public static final int BOARD_SIZE =  5;
+    public static final int BOARD_SIZE =  42;
     public static int[][] aBoard;
     public static boolean[][] visited = new boolean[BOARD_SIZE][BOARD_SIZE];
 
@@ -33,17 +33,18 @@ public class MyTools {
     public static void initVisited(){
         for(int i = 0; i<BOARD_SIZE;i++){  //initialize visited array.
             for(int j=0;j<BOARD_SIZE;j++){
-                if(j>=36 && j<=38){
-                    visited[i][j]=false;
-                    if((j>=9 && j<=11)||(j>=15 && j<=17)||(j>=21 && j<=23)){ //if it's 3 hidden cards
-                        visited[i][j]=true;
-                    }
-                } else{
-                    visited[i][j]=false;
-                }
-
+                if(i>=36 && i<=38){
+                    if(j>=9 && j<=11){ visited[i][j]=true; }
+                    else if(j>=15 && j<=17){ visited[i][j]=true; }
+                    else if(j>=21 && j<=23){ visited[i][j]=true; }
+                    else{visited[i][j]=false;}
+                } else{ visited[i][j]=false; }
+//                System.out.print(visited[i][j]);
+//                System.out.print(' ');
             }
+//            System.out.println();
         }
+
     }
 
 
@@ -121,7 +122,7 @@ class Path{
         }else{ //if another 1 has been found
             student_player.MyTools.visited[i][j] = true;
             int ans = 1;
-            if(i==5 && j==14){  //if we found it at origin
+            if(i==16 && j==16){  //if we found it at origin
                 startsAtOrigin=true;
             }
             for (int d=0; d<4;d++){
