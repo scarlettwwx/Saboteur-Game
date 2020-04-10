@@ -2,6 +2,7 @@ package student_player;
 
 import Saboteur.SaboteurBoard;
 import Saboteur.SaboteurBoardState;
+import Saboteur.SaboteurMove;
 import Saboteur.cardClasses.SaboteurTile;
 import boardgame.Board;
 
@@ -23,11 +24,16 @@ public class MyTools {
     //    public final int BOARD_SIZE =  SaboteurBoardState.BOARD_SIZE;
     public static final int BOARD_SIZE =  42;
     public static int[][] aBoard;
+    public static SaboteurTile[][] aTileBoard;
     public static boolean[][] visited = new boolean[BOARD_SIZE][BOARD_SIZE];
 
     public MyTools(int[][] pBoard){
         aBoard=pBoard;
-        initVisited();
+    }
+
+    public MyTools(int[][] pBoard, SaboteurTile[][] pTileBoard){
+        aBoard=pBoard;
+        aTileBoard=pTileBoard;
     }
 
     public static void initVisited(){
@@ -47,9 +53,20 @@ public class MyTools {
 
     }
 
+    public static void printIntBoard(){
+        for(int i =0; i<BOARD_SIZE; i++){
+            for(int j=0;j<BOARD_SIZE;j++){
+                System.out.print(aBoard[i][j]);
+                System.out.print(' ');
+            }
+            System.out.println();
+        }
+    }
+
 
 
     public static ArrayList<student_player.Path> searchBoard(){
+        initVisited(); //needs it as to initialize visited array everytime.
         ArrayList<student_player.Path> arr =new ArrayList<student_player.Path>();
         for(int i=0;i<BOARD_SIZE;i++){
             for(int j=0;j<BOARD_SIZE;j++){
@@ -68,68 +85,170 @@ public class MyTools {
     }
 
 
+    //wenwen
+
+    public static int openEndsWholeBoard (SaboteurBoardState boardState) {
+        int num = 0;
+        int[][] intBoard = boardState.getHiddenIntBoard();
+        for (int i= 1; i< intBoard.length-7;i++) {
+            for (int j= 0; j< intBoard.length-1;j++) {
+                //check row
+                if((intBoard[i][j] == -1 && intBoard[i][j+1] == 1) || (intBoard[i][j] == 1 && intBoard[i][j+1] == -1)) {
+                    num++;
+                }
+                //check column
+                if((intBoard[i-1][j] == -1 && intBoard[i][j] == 1) || (intBoard[i][j] == 1 && intBoard[i+1][j] == -1)) {
+                    num++;
+                }
+
+            }
+        }
+        return num;
+    }
+
+    public static int pathToHiddenDis (ArrayList<student_player.Path> paths, int[] coord) {
+        int total= 0;
+        for (student_player.Path a: paths){
+            total += a.manhattanDistance(coord[0],coord[1]);
+        }
+        return total;
+    }
+
+    public static int disToThreeHidden() {
+        int credit=0;
+        int[] leftHidden= {36,10};
+        int[] middleHidden= {36,16};
+        int[] rightHidden= {36,22};
+        SaboteurTile[][] tiles = student_player.MyTools.aTileBoard;
+        int[][] board =  student_player.MyTools.aBoard;
+//        student_player.MyTools tryy = new student_player.MyTools(board);
+        ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
+
+        //if three hidden objectives are not visible;
+        if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one nugget is visible or the other two hidden1/2 are visible
+        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, leftHidden);
+        }
+        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, middleHidden);
+        }
+        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one hidden is visible:
+        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
+        }
+        return credit;
+    }
+
+
+
+    /*
+     * Overload to check a path's hidden distance.
+     * */
+
+    public static int disToThreeHidden(student_player.Path temp) {
+        int credit=0;
+        int[] leftHidden= {36,10};
+        int[] middleHidden= {36,16};
+        int[] rightHidden= {36,22};
+        SaboteurTile[][] tiles = student_player.MyTools.aTileBoard;
+        int[][] board =  student_player.MyTools.aBoard;
+        ArrayList<student_player.Path> temp2= new ArrayList<student_player.Path>();
+        temp2.add(temp);
+//        student_player.MyTools tryy = new student_player.MyTools(board);
+//        ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
+
+        //if three hidden objectives are not visible;
+        if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one nugget is visible or the other two hidden1/2 are visible
+        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, leftHidden);
+        }
+        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, middleHidden);
+        }
+        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            credit = -pathToHiddenDis(temp2, rightHidden);
+        }
+        //if one hidden is visible:
+        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
+        }
+        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+            credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
+        }
+        return credit;
+    }
+
 
 
     public static void main(String args[]){
-        int[][] board = {{0,0,0,0,0},{0,1,0,0,1},{0,0,1,0,1},{0,0,-1,1,1},{0,0,0,0,-1}};
-        student_player.MyTools tryy = new student_player.MyTools(board);
-        ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
 
-        for (student_player.Path a: temp2){
+        SaboteurBoardState board = new SaboteurBoardState();
+        board.printBoard();  //with search board
+        student_player.MyTools tryy = new student_player.MyTools(board.getHiddenIntBoard(),board.getHiddenBoard());
+
+        System.out.println("board Before processmove:");
+        board.printBoard();
+
+
+        System.out.println("Before Process move");
+        for (student_player.Path a: student_player.MyTools.searchBoard()){
             System.out.println(a);
-
         }
+
+
+        System.out.println("Board Stored in MyTool as static:");
+        student_player.MyTools.printIntBoard();
+
+        System.out.println();
+
+
+
+
+
+
+
+        SaboteurMove move1 = new SaboteurMove((new SaboteurTile("5")).getFlipped(),5,6,1);
+        //Incorrect usage example:
+        // SaboteurMove move1 = new SaboteurMove(new SaboteurTile(5_flip),5,6,1); needs .getflipped for a flipped card.
+
+        board.processMove(move1);
+
+        System.out.println("with Process move");
+        for (student_player.Path a: student_player.MyTools.searchBoard()){
+            System.out.println(a);
+        }
+
+        System.out.println("board After processmove:");
+        board.printBoard();
+
+        System.out.println("Board Stored in MyTool as static:");
+        student_player.MyTools.printIntBoard();
+
+
 
 
     }
 
 }
 
-//wenwen
-    public static int pathToHiddenDis (ArrayList<student_player.Path> paths, int[] coord) {
-    		int total= 0;
-    		for (student_player.Path a: paths){
-    			total += a.manhattanDistance(coord[0],coord[1]);
-    		}
-    		return total;
-    }
-    
-    public static int disToThreeHidden(SaboteurBoardState pbs) {
-    		int credit=0;
-        int[] leftHidden= {36,10};
-        int[] middleHidden= {36,16};
-        int[] rightHidden= {36,22};
-        SaboteurTile[][] tiles = pbs.getHiddenBoard();
-        int[][] board =  pbs.getHiddenIntBoard();
-        student_player.MyTools tryy = new student_player.MyTools(board);
-        ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
-       
-        //if three hidden objectives are not visible;
-        if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
-        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-        }
-        //if one nugget is visible or the other two hidden1/2 are visible
-        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
-        		credit = -pathToHiddenDis(temp2, leftHidden);
-        }
-        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
-    			credit = -pathToHiddenDis(temp2, middleHidden);
-        }
-        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
-			credit = -pathToHiddenDis(temp2, rightHidden);
-        }
-        //if one hidden is visible:
-        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
-        		credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-        }
-        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
-        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
-        }
-        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
-        		credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
-        }
-        return credit;
-    }
 
 class Path{
     public int numOnes;
@@ -160,6 +279,23 @@ class Path{
                 if (i>row){  //check if it's the deepest.
                     deepestEnd[0]=i;
                     deepestEnd[1]=j;
+
+                }else if(i==row){ //use disToThreeHidden to check who's the deepest end
+                    int[] coordinate = new int[2];
+                    coordinate[0]=i;
+                    coordinate[1]=j;
+                    student_player.Path temp1 = new student_player.Path();
+                    temp1.deepestEnd=coordinate;
+                    student_player.Path temp2 = new student_player.Path();
+                    temp2.deepestEnd=deepestEnd;
+
+                    int l1dis = student_player.MyTools.disToThreeHidden(temp1);
+                    int l2dis = student_player.MyTools.disToThreeHidden(temp2);
+
+                    if(l1dis > l2dis ){
+                        deepestEnd[0]=i;
+                        deepestEnd[1]=j;
+                    }
                 }
                 openEnds++;
             }
@@ -178,9 +314,11 @@ class Path{
 
         }
     }
-    
+
+
     public int manhattanDistance(int c, int d) {
-    		//two coordinate: (deepestEnd[0],deepestEnd[1]) (c,d)
-    		return Math.abs(deepestEnd[0]-c)+Math.abs(deepestEnd[1]-d);
+        //two coordinate: (deepestEnd[0],deepestEnd[1]) (c,d)
+        return Math.abs(deepestEnd[0]-c)+Math.abs(deepestEnd[1]-d);
     }
+
 }
