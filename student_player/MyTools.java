@@ -83,6 +83,25 @@ public class MyTools {
         }
         return arr;
     }
+	
+    public static int openEndsWholeBoard (SaboteurBoardState boardState) {
+		int num = 0;
+		int[][] intBoard = boardState.getHiddenIntBoard();
+		for (int i= 1; i< intBoard.length-7;i++) {
+			for (int j= 0; j< intBoard.length-1;j++) {
+				//check row
+				if((intBoard[i][j] == -1 && intBoard[i][j+1] == 1) || (intBoard[i][j] == 1 && intBoard[i][j+1] == -1)) {
+					num++;
+				}
+				//check column
+				if((intBoard[i-1][j] == -1 && intBoard[i][j] == 1) || (intBoard[i][j] == 1 && intBoard[i+1][j] == -1)) {
+						num++;
+				}
+				
+			}
+		}
+		return num;
+    }	
 
 
     //wenwen
