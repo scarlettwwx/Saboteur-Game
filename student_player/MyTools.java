@@ -5,7 +5,7 @@ import Saboteur.SaboteurBoardState;
 import Saboteur.SaboteurMove;
 import Saboteur.cardClasses.SaboteurTile;
 import boardgame.Board;
-
+import student_player.StudentPlayer;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -83,30 +83,33 @@ public class MyTools {
         }
         return arr;
     }
-	
-    public static int openEndsWholeBoard (SaboteurBoardState boardState) {
-		int num = 0;
-		int[][] intBoard = boardState.getHiddenIntBoard();
-		for (int i= 1; i< intBoard.length-7;i++) {
-			for (int j= 0; j< intBoard.length-1;j++) {
-				//check row
-				if((intBoard[i][j] == -1 && intBoard[i][j+1] == 1) || (intBoard[i][j] == 1 && intBoard[i][j+1] == -1)) {
-					num++;
-				}
-				//check column
-				if((intBoard[i-1][j] == -1 && intBoard[i][j] == 1) || (intBoard[i][j] == 1 && intBoard[i+1][j] == -1)) {
-						num++;
-				}
-				
-			}
-		}
-		return num;
-    }	
+		
 
 
     //wenwen
 
     public static int openEndsWholeBoard (SaboteurBoardState boardState) {
+        int num = 0;
+        int[][] intBoard = boardState.getHiddenIntBoard();
+        for (int i= 1; i< intBoard.length-7;i++) {
+            for (int j= 0; j< intBoard.length-1;j++) {
+                //check row
+                if((intBoard[i][j] == -1 && intBoard[i][j+1] == 1) || (intBoard[i][j] == 1 && intBoard[i][j+1] == -1)) {
+                    num++;
+                }
+                //check column
+                if((intBoard[i-1][j] == -1 && intBoard[i][j] == 1) || (intBoard[i][j] == 1 && intBoard[i+1][j] == -1)) {
+                    num++;
+                }
+
+            }
+        }
+        return num;
+    }
+    
+    //for copy board:
+    
+    public static int openEndsWholeBoard (SaboteurBoardStateCopy boardState) {
         int num = 0;
         int[][] intBoard = boardState.getHiddenIntBoard();
         for (int i= 1; i< intBoard.length-7;i++) {
@@ -142,6 +145,10 @@ public class MyTools {
         int[][] board =  student_player.MyTools.aBoard;
 //        student_player.MyTools tryy = new student_player.MyTools(board);
         ArrayList<student_player.Path> temp2 = student_player.MyTools.searchBoard();
+        
+        if (temp2.isEmpty()) {
+        	 	return Integer.MIN_VALUE+1;
+        }
 
         //if three hidden objectives are not visible;
         if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
@@ -167,7 +174,7 @@ public class MyTools {
         if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
         }
-        return credit;
+        return (credit / temp2.size());
     }
 
 
@@ -220,7 +227,7 @@ public class MyTools {
     public static void main(String args[]){
 
         SaboteurBoardState board = new SaboteurBoardState();
-        board.printBoard();  //with search board
+       // board.printBoard();  //with search board
         student_player.MyTools tryy = new student_player.MyTools(board.getHiddenIntBoard(),board.getHiddenBoard());
 
         System.out.println("board Before processmove:");
@@ -231,24 +238,37 @@ public class MyTools {
         for (student_player.Path a: student_player.MyTools.searchBoard()){
             System.out.println(a);
         }
+        double c = StudentPlayer.evaluate(board);
+        System.out.println("Score of this board before process:" + c);
 
-
-        System.out.println("Board Stored in MyTool as static:");
-        student_player.MyTools.printIntBoard();
-
-        System.out.println();
-
-
-
-
-
-
-
-        SaboteurMove move1 = new SaboteurMove((new SaboteurTile("5")).getFlipped(),5,6,1);
-        //Incorrect usage example:
-        // SaboteurMove move1 = new SaboteurMove(new SaboteurTile(5_flip),5,6,1); needs .getflipped for a flipped card.
-
+        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
+        int i=0;
+        SaboteurBoardStateCopy sb = new SaboteurBoardStateCopy(board);
+        
+        for (SaboteurMove m : sb.getAllLegalMoves()) {
+        	    System.out.println("Chose the move: "+ m.toPrettyString());
+        		SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
+        		//sbsc.printBoard();
+        		if (!sbsc.isLegal(m)) {
+        			System.out.println("illegal");
+        			continue;
+        		}
+        		sbsc.processMove(m);
+        		
+        		scoreOFMoves[i]= StudentPlayer.evaluate(sbsc);
+        		System.out.println("score is:"+ scoreOFMoves[i]);
+        		i++;
+        }
+        
+        
+/*
+        SaboteurMove move1 = board.getRandomMove();//new SaboteurMove((new SaboteurTile("5")).getFlipped(),5,6,1);
+        System.out.println("Chosed move: " + move1.toPrettyString());
+ 
+        
         board.processMove(move1);
+        double x = StudentPlayer.evaluate(board);
+        System.out.println("Score of this board:" + x);
 
         System.out.println("with Process move");
         for (student_player.Path a: student_player.MyTools.searchBoard()){
@@ -256,12 +276,9 @@ public class MyTools {
         }
 
         System.out.println("board After processmove:");
-        board.printBoard();
-
-        System.out.println("Board Stored in MyTool as static:");
-        student_player.MyTools.printIntBoard();
-
-
+        board.printBoard();*/
+        
+        
 
 
     }
