@@ -56,6 +56,47 @@ public class StudentPlayer extends SaboteurPlayer {
         }
     }
 
+    protected double minimax(int depth, SaboteurBoardStateCopy board, double alpha, double beta){
+        boolean isMax = (board.getTurnPlayer()==board.AGENT_ID); //if 1, max player, else minplayer
+        double score;
+        ArrayList<SaboteurMove> allMoves = board.getAllLegalMoves();
+        if(board.getWinner() == board.AGENT_ID || board.getWinner() == (1-board.AGENT_ID) || board.getWinner()==Board.DRAW){
+            return evaluate(board);
+        }
+        if(isMax){
+            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
+                SaboteurMove move = a.next();
+                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
+                child.processMove(move);
+                score = minimax(depth-1, child, alpha,beta);
+                if(score> alpha){
+                    alpha = score;
+                }
+                if(alpha>=beta){
+                    break;
+                }
+            }
+            return alpha;
+        }else{
+            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
+                SaboteurMove move = a.next();
+                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
+                child.processMove(move);
+                score = minimax(depth-1, child, alpha,beta);
+                if(score < beta){
+                    beta = score;
+                }
+                if(alpha>=beta){
+                    break;
+                }
+            }
+            return beta;
+        }
+    }
+
+
+
+
     //1. evaluate on boardState
     public static double evaluate(SaboteurBoardState pBoard){
         int player_id = pBoard.getTurnPlayer();
@@ -67,10 +108,12 @@ public class StudentPlayer extends SaboteurPlayer {
         boolean exist = player_id==0;
         double score1 = 3* MyTools.disToThreeHidden(pBoard);
         double score2 = MyTools.openEndsWholeBoard(pBoard);
+
         SaboteurTile[][] tiles= pBoard.getHiddenBoard();
         int numOfHidden = 0;
         int nugget= 0;
         int i =0;
+
         while(i<3){
             int j = 3 + i*2;
             //if the first card is hidden1 or 2.
@@ -81,6 +124,7 @@ public class StudentPlayer extends SaboteurPlayer {
             }
             i++;
         }
+
         double score3 = numOfHidden*10 + nugget*30; //check hidden cards
 
         double score4 = pBoard.getNbMalus(pBoard.getTurnPlayer());
@@ -138,19 +182,13 @@ public class StudentPlayer extends SaboteurPlayer {
         // For example, maybe you'll need to load some pre-processed best opening
         // strategies...
         MyTools.getSomething();
+//        MyTools p1= new MyTools();
         Move myMove = null;
         // Is random the best you can do?
-        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
+        ArrayList<Double> scoreOFMoves = new ArrayList<>();
         int i=0;
 
-        for(SaboteurMove sm : board.getAllLegalMoves()){
-            SaboteurCard sc = sm.getCardPlayed();
-            if(sc.getName().equals("bonus")){
-                myMove = sm;
-                return myMove;
-            }
-        }
-
+        double max=Integer.MIN_VALUE;
         for (SaboteurMove m : board.getAllLegalMoves()) {
             //System.out.println("Chose the move: "+ m.toPrettyString());
             SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
@@ -160,33 +198,16 @@ public class StudentPlayer extends SaboteurPlayer {
                 continue;
             }
             sbsc.processMove(m);
-            scoreOFMoves[i]= student_player.StudentPlayer.evaluate(sbsc);
-            //System.out.println("score is:"+ scoreOFMoves[i]);
-            i++;
-        }
-
-        Arrays.sort(scoreOFMoves);
-        double maxScore = scoreOFMoves[scoreOFMoves.length-1];
-        for (SaboteurMove m : board.getAllLegalMoves()) {
-            //System.out.println("Chose the move: "+ m.toPrettyString());
-            SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
-
-            if (!sbsc.isLegal(m)) {
-                System.out.println("illegal");
-                continue;
-            }
-            sbsc.processMove(m);
-            if(student_player.StudentPlayer.evaluate(sbsc)==maxScore) {
-                //how to choose a good move?
+            double curr = student_player.StudentPlayer.evaluate(sbsc);
+            if(max< student_player.StudentPlayer.evaluate(sbsc)){
+                max = curr;
+                System.out.println(max);
                 myMove = m;
-                System.out.println(maxScore);
-            }
-            i++;
+            };
+
         }
         return myMove;
-        //Move myMove = boardState.getRandomMove(); //return type = SaboteurMove
 
-        // Return your move to be processed by the server.
 
     }
 
