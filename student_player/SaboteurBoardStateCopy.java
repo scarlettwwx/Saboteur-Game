@@ -157,13 +157,21 @@ public class SaboteurBoardStateCopy extends BoardState {
             System.arraycopy(hiddenboard[i], 0, this.board[i], 0, BOARD_SIZE);
         }
 
-        //we are not looking for shallow copy (where element are not copied) but deep copy, so that the user can't destroy the board that is sent to him...
-        this.player1Cards = pbs.getCurrentPlayerCards();  //get agent's hand
+        boolean[] opponentReveal = {true,true,true}; //assume opponents has the best info
+
+        if(pbs.getTurnPlayer()==0){
+            this.turnPlayer=0;
+            this.player2Cards = pbs.getCurrentPlayerCards();  //get agent's hand
+            System.arraycopy(opponentReveal, 0, this.player1hiddenRevealed, 0, opponentReveal.length);
+        }
+        else{  //if I am the first player
+            this.turnPlayer=1;
+            this.player1Cards = pbs.getCurrentPlayerCards();  //get agent's hand
+            System.arraycopy(opponentReveal, 0, this.player2hiddenRevealed, 0, opponentReveal.length);
+        }
 
         int numOfHidden = setTrackHiddenstatus(hiddenboard); //updates hiddenCards,hiddenstatus, return non-hidden cards number
 
-        boolean[] opponentReveal = {true,true,true}; //assume opponents has the best info
-        System.arraycopy(opponentReveal, 0, this.player2hiddenRevealed, 0, opponentReveal.length);
 
         //先默认hiddenreview是false吧，感觉只有当我们找到correct path 才会变成true。这种时候都赢了
         //所以下面的copy也不需要了
@@ -171,31 +179,23 @@ public class SaboteurBoardStateCopy extends BoardState {
         this.player1nbMalus = pbs.getNbMalus(1);
         this.player2nbMalus = pbs.getNbMalus(0);
         this.winner = pbs.getWinner();
-        this.FIRST_PLAYER = pbs.firstPlayer();
-        System.out.println("");
         this.turnNumber = pbs.getTurnNumber();
-        this.turnPlayer=pbs.getTurnPlayer();
 
-//        if(turnNumber==0){ //when no round is played
-//            if(this.player==FIRST_PLAYER){ //if we are 1
-//
-//            }
-//            this.turnPlayer=FIRST_PLAYER;
-//        }
-//        System.out.println("pbs.firstPlayer()");
-//        System.out.println(pbs.firstPlayer());
+        guessCurrentDeck(hiddenboard,numOfHidden);
 
-
-        guessCurrentDeck(hiddenboard,this.player1Cards ,numOfHidden);
-
-        CreateOpponentHand();    //随机抽牌给player2
+        CreateOpponentHand();    //随机抽牌给player2 or player1
         this.intBoard = new int[BOARD_SIZE*3][BOARD_SIZE*3];
         getIntBoard();
+        //?????
+        if(this.turnNumber==0){  //special case when first round.
+            this.turnPlayer=pbs.getTurnPlayer();
+        }
 
     }
 
-    public void guessCurrentDeck(SaboteurTile[][] pTile, ArrayList<SaboteurCard> pCards,int map){
+    public void guessCurrentDeck(SaboteurTile[][] pTile,int map){
         this.Deck = SaboteurCard.getDeck();
+        ArrayList<SaboteurCard> pCards = this.getCurrentPlayerCards();
         ArrayList<SaboteurCard> deck = this.Deck;
         //Collections.shuffle(deck);
         //之后shuffle也可以
@@ -266,14 +266,27 @@ public class SaboteurBoardStateCopy extends BoardState {
 
 
     public void CreateOpponentHand(){
-        this.player2Cards = new ArrayList<SaboteurCard>();
-        if(this.Deck.size()>0){
-            for(int i=0;i<this.player1Cards.size();i++){
-                if(this.Deck.size()>0){
-                    this.player2Cards.add(this.Deck.remove(0)); //draw same number of cards as player1.
+        if(this.turnPlayer==1){
+            this.player2Cards = new ArrayList<SaboteurCard>();
+            if(this.Deck.size()>0){
+                for(int i=0;i<this.player1Cards.size();i++){
+                    if(this.Deck.size()>0){
+                        this.player2Cards.add(this.Deck.remove(0)); //draw same number of cards as player1.
+                    }
                 }
             }
+        }else{
+            this.player1Cards = new ArrayList<SaboteurCard>();
+            if(this.Deck.size()>0){
+                for(int i=0;i<this.player2Cards.size();i++){
+                    if(this.Deck.size()>0){
+                        this.player1Cards.add(this.Deck.remove(0)); //draw same number of cards as player1.
+                    }
+                }
+            }
+
         }
+
     }
 
     //return hidden status. Remove hidden cards.
@@ -291,10 +304,14 @@ public class SaboteurBoardStateCopy extends BoardState {
             this.hiddenCards[i] = this.board[hiddenPos[i][0]][hiddenPos[i][1]];
         }
 
-        int i=0; //sum of unhidden cards
-        if(!tiles[12][3].getIdx().equals( "8")) {
-            this.player1hiddenRevealed[0] = true;
-            i++;
+        int sum=0; //sum of unhidden cards
+        if(!tiles[12][3].getIdx().equals("8")) {
+            if(this.turnPlayer==1){
+                this.player1hiddenRevealed[0] = true;
+            }else{
+                this.player2hiddenRevealed[0] = true; //I'm the second player.
+            }
+            sum++; //this is unhidden , sum++
 
             if (tiles[12][3].getIdx().equals("nugget")) {
                 this.hiddenCards[0] =  tiles[12][3];
@@ -304,8 +321,12 @@ public class SaboteurBoardStateCopy extends BoardState {
         }
 
         if(!tiles[12][5].getIdx().equals( "8") ){
-            this.player1hiddenRevealed[1]=true;
-            i++;
+            if(this.turnPlayer==1){
+                this.player1hiddenRevealed[0] = true;
+            }else{
+                this.player2hiddenRevealed[0] = true; //I'm the second player.
+            }
+            sum++;
 
             if (tiles[12][5].getIdx().equals("nugget")) {
                 this.hiddenCards[1] =  tiles[12][5];
@@ -315,8 +336,12 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
         }
         if(!tiles[12][7].getIdx().equals( "8")){
-            this.player1hiddenRevealed[2]=true;
-            i++;
+            if(this.turnPlayer==1){
+                this.player1hiddenRevealed[0] = true;
+            }else{
+                this.player2hiddenRevealed[0] = true; //I'm the second player.
+            }
+            sum++;
 
             if (tiles[12][7].getIdx().equals("nugget")) {
                 this.hiddenCards[2] =  tiles[12][7];
@@ -325,7 +350,7 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
         }
         //if one nugget is visible or the other two hidden1/2 are visible
-        return i;
+        return sum;
     }
 
 
@@ -382,9 +407,22 @@ public class SaboteurBoardStateCopy extends BoardState {
         }
     }
 
-//如果我们用processmove， 这个就是鸡肋
-//    public ArrayList<SaboteurCard> getCurrentPlayerCards(){
-
+    public ArrayList<SaboteurCard> getCurrentPlayerCards(){
+        if(turnPlayer==1){
+            ArrayList<SaboteurCard> p1Cards = new ArrayList<SaboteurCard>();
+            for(int i=0;i<this.player1Cards.size();i++){
+                p1Cards.add(i,SaboteurCard.copyACard(this.player1Cards.get(i).getName()));
+            }
+            return p1Cards;
+        }
+        else{
+            ArrayList<SaboteurCard> p2Cards = new ArrayList<SaboteurCard>();
+            for(int i=0;i<this.player2Cards.size();i++){
+                p2Cards.add(i,SaboteurCard.copyACard(this.player2Cards.get(i).getName()));
+            }
+            return p2Cards;
+        }
+    }
 
     private int[][] getIntBoard() {
         //update the int board.
