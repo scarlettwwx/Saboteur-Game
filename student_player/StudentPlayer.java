@@ -167,6 +167,39 @@ public class StudentPlayer extends SaboteurPlayer {
         return score1+score2+score3+score4;
     }
 
+      public static int evalMove (SaboteurMove sm) {
+    		int[] posi=sm.getPosPlayed(); 
+    		int disToEntrance = (posi[0]+posi[1]-10); // 往entrance之上放减一点分
+    		int cardScore=0;
+    		String name = sm.getCardPlayed().getName();
+    		
+    		//开放形tile加分：
+    		String[] opening = {"0","0_flip", "5","5_flip","6","6_flip","7","7_flip","8","8_flip", "9","9_flip","10","10_flip"};
+         for(String o : opening){
+             if(o.equals(name)) {
+            	 	cardScore += 1;
+            	 	break;
+             }
+          }
+         
+         if(name.equals("Malus")) {
+        	 	return 100;
+         }
+         
+         if(name.equals("Map")) {
+      	 	return 500;
+          }
+         
+         if(name.equals("Bonus")) {
+     	 	return 1000;
+         }
+         
+         if(name.equals("Drop")) {
+      	 	return -1000;
+          }
+         
+    		return disToEntrance+cardScore;
+      }
 
 
     /**
