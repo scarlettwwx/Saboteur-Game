@@ -172,14 +172,19 @@ public class SaboteurBoardStateCopy extends BoardState {
         this.player2nbMalus = pbs.getNbMalus(0);
         this.winner = pbs.getWinner();
         this.FIRST_PLAYER = pbs.firstPlayer();
+        System.out.println("");
         this.turnNumber = pbs.getTurnNumber();
         this.turnPlayer=pbs.getTurnPlayer();
 
-        if(turnNumber==0){ //when no round is played
-            this.turnPlayer=FIRST_PLAYER;
-        }
+//        if(turnNumber==0){ //when no round is played
+//            if(this.player==FIRST_PLAYER){ //if we are 1
+//
+//            }
+//            this.turnPlayer=FIRST_PLAYER;
+//        }
 //        System.out.println("pbs.firstPlayer()");
 //        System.out.println(pbs.firstPlayer());
+
 
         guessCurrentDeck(hiddenboard,this.player1Cards ,numOfHidden);
 
@@ -219,10 +224,11 @@ public class SaboteurBoardStateCopy extends BoardState {
 
                 Iterator<SaboteurCard> iter = deck.iterator();   //updates a new iter
                 while (iter.hasNext()) {
-                    if (iter.next().getName().equals(cardname)) { //when we have found the same card in the deck.
+                    SaboteurCard card = iter.next();
+                    if (card.getName().equals(cardname)) { //when we have found the same card in the deck.
                         iter.remove();   //remove it
                         break;
-                    } else if (iter.next().getName().equals(flippedcardname)) {
+                    } else if (card.getName().equals(flippedcardname)) {
                         iter.remove();   //remove it
                         break;
                     }
@@ -230,9 +236,8 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
         }
 
-        Iterator<SaboteurCard> iter3 = deck.iterator();   //removes map
-        Iterator<SaboteurCard> iter4 = deck.iterator();   //removes malus
 
+        Iterator<SaboteurCard> iter3 = deck.iterator();   //removes map
         int k = 0;
         map = map +3; //assume opponents know everything.
         while(iter3.hasNext() && k<map){
@@ -245,11 +250,13 @@ public class SaboteurBoardStateCopy extends BoardState {
         k=0;
         //THIS SOMETIMES CAUSE ERRORS.
         int malus = getNbMalus(0)+getNbMalus(1);
-        while(iter4.hasNext() && k<malus){
-            if(iter4.next().getName().equals("Malus")){
-                iter4.remove();
+        for(Iterator<SaboteurCard> iterator = deck.iterator();iterator.hasNext();){
+            SaboteurCard card = iterator.next();
+            if((card.getName()).equals("Malus") && k<malus){
+                iterator.remove();
                 k++;
             }
+
         }
         Collections.shuffle(deck);
 
@@ -1125,6 +1132,7 @@ public class SaboteurBoardStateCopy extends BoardState {
 
         copy3.printBoard();
         copy3.printBothHands();
+
 
 
     }
