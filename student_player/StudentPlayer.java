@@ -56,19 +56,22 @@ public class StudentPlayer extends SaboteurPlayer {
         }
     }
 
-    protected double minimax(int depth, SaboteurBoardStateCopy board, double alpha, double beta){
-        boolean isMax = (board.getTurnPlayer()==board.AGENT_ID); //if 1, max player, else minplayer
+    public static double minimax(int depth, SaboteurBoardStateCopy board, double alpha, double beta, boolean isMax){
         double score;
         ArrayList<SaboteurMove> allMoves = board.getAllLegalMoves();
-        if(board.getWinner() == board.AGENT_ID || board.getWinner() == (1-board.AGENT_ID) || board.getWinner()==Board.DRAW){
-            return evaluate(board);
+        //if leaf node:
+        if(depth == 0 || board.getWinner() == board.AGENT_ID || board.getWinner() == (1-board.AGENT_ID) || board.getWinner()==Board.DRAW){
+            double result =  evaluate(board);
+            System.out.println("RESULTS:");
+            System.out.println(result);
+            return result;
         }
         if(isMax){
             for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
                 SaboteurMove move = a.next();
                 SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
                 child.processMove(move);
-                score = minimax(depth-1, child, alpha,beta);
+                score = minimax(depth-1, child, alpha,beta,false);
                 if(score> alpha){
                     alpha = score;
                 }
@@ -82,7 +85,7 @@ public class StudentPlayer extends SaboteurPlayer {
                 SaboteurMove move = a.next();
                 SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
                 child.processMove(move);
-                score = minimax(depth-1, child, alpha,beta);
+                score = minimax(depth-1, child, alpha,beta,true);
                 if(score < beta){
                     beta = score;
                 }
@@ -166,12 +169,6 @@ public class StudentPlayer extends SaboteurPlayer {
 
 
 
-
-    protected student_player.StudentPlayer.MoveValue minimax(double alpha, double beta, int originalDepth, int maxDepth, SaboteurBoardState boardState, int turnplayer, final SaboteurMove lastMove) {
-        return null;
-    }
-
-
     /**
      * This is the primary method that you need to implement. The ``boardState``
      * object contains the current state of the game, which your agent must use to
@@ -208,12 +205,32 @@ public class StudentPlayer extends SaboteurPlayer {
         }
         return myMove;
 
-
     }
 
     public static void main(String args[]){
-        System.out.println("helo");
-    }
+        SaboteurBoardState newboard = new SaboteurBoardState();
+        student_player.StudentPlayer a = new student_player.StudentPlayer();
+        newboard.processMove( newboard.getRandomMove());
+        double max = Integer.MIN_VALUE;
+        SaboteurMove bestmove = null;
+        for(SaboteurMove temp: newboard.getAllLegalMoves()){
+            System.out.println(temp.toPrettyString());
+            SaboteurBoardStateCopy copy  = new SaboteurBoardStateCopy(newboard);
+//            copy.processMove(temp);
+            System.out.println("Minimax results:");
+            double curr = student_player.StudentPlayer.minimax(1,copy,Integer.MIN_VALUE,Integer.MAX_VALUE,true);
+            System.out.println(curr);
+            if(curr>max){
+                max = curr;
+                bestmove = temp;
+            }
+        }
+        System.out.println();
 
+        System.out.println(bestmove.toPrettyString());
+        System.out.println(newboard.getAllLegalMoves().size());
+
+
+    }
 
 }
