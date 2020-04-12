@@ -125,32 +125,63 @@ public class StudentPlayer extends SaboteurPlayer {
     protected MoveValue minimax(double alpha, double beta, int originalDepth, int maxDepth, SaboteurBoardState boardState, int turnplayer, final SaboteurMove lastMove) {
     		return null;
     }
+    
+    
     /**
      * This is the primary method that you need to implement. The ``boardState``
      * object contains the current state of the game, which your agent must use to
      * make decisions.
      */
-    public Move chooseMove(SaboteurBoardState boardState) {
+    public Move chooseMove(SaboteurBoardState board) {
         // You probably will make separate functions in MyTools.
         // For example, maybe you'll need to load some pre-processed best opening
         // strategies...
         MyTools.getSomething();
-
+        Move myMove = null;
         // Is random the best you can do?
-        double [] scoreOFMoves = new double[boardState.getAllLegalMoves().size()];
+        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
         int i=0;
-        //SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(boardState);
-        for (SaboteurMove m : boardState.getAllLegalMoves()) {
-        		SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(boardState);
+          
+        for (SaboteurMove m : board.getAllLegalMoves()) {
+        	    //System.out.println("Chose the move: "+ m.toPrettyString());
+     		SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
+        		
+        		if (!sbsc.isLegal(m)) {
+        			System.out.println("illegal");
+        			continue;
+        		}
         		sbsc.processMove(m);
-        		scoreOFMoves[i]= evaluate(sbsc);
+        		scoreOFMoves[i]= StudentPlayer.evaluate(sbsc);
+        		//System.out.println("score is:"+ scoreOFMoves[i]);
         		i++;
         }
         
-        Move myMove = boardState.getRandomMove(); //return type = SaboteurMove
+        Arrays.sort(scoreOFMoves);
+        double maxScore = scoreOFMoves[scoreOFMoves.length-1];
+        for (SaboteurMove m : board.getAllLegalMoves()) {
+        		//System.out.println("Chose the move: "+ m.toPrettyString());
+        		SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
+    		
+        		if (!sbsc.isLegal(m)) {
+        			System.out.println("illegal");
+        			continue;
+        		}
+        		sbsc.processMove(m);
+        		if(StudentPlayer.evaluate(sbsc)==maxScore) {
+        			//how to choose a good move?
+        			myMove = m;
+        		}
+        		i++;
+    }
+        return myMove;
+        //Move myMove = boardState.getRandomMove(); //return type = SaboteurMove
 
         // Return your move to be processed by the server.
-        return myMove;
+       
+    }
+    
+    public static void main(String args[]){
+    		System.out.println("helo");
     }
     
     
