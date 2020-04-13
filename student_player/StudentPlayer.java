@@ -29,74 +29,38 @@ public class StudentPlayer extends SaboteurPlayer {
         super("260769099");
     }
 
-    private class MoveValue {
+    public static int evalMove (SaboteurMove sm) {
+        int[] posi=sm.getPosPlayed();
+        int disToEntrance = (posi[0]+posi[1]-10); // 往entrance之上放减一点分
+        int cardScore=0;
+        String name = sm.getCardPlayed().getName();
 
-        public double returnValue;
-        public Move returnMove;
-
-        public MoveValue(double returnValue) {
-            this.returnValue = returnValue;
-        }
-
-        public MoveValue(double returnValue, Move returnMove) {
-            this.returnValue = returnValue;
-            this.returnMove = returnMove;
-        }
-    }
-
-    private class StateMove{
-        public Move move;
-        public SaboteurBoardState boardState;
-        public double eval;
-
-        public StateMove(Move move, SaboteurBoardState boardState) {
-            this.move = move;
-            this.boardState = boardState;
-            this.eval = evaluate(boardState); //to implement
-        }
-    }
-
-    public static double minimax(int depth, SaboteurBoardStateCopy board, double alpha, double beta, boolean isMax){
-        double score;
-        ArrayList<SaboteurMove> allMoves = board.getAllLegalMoves();
-        //if leaf node:
-        if(depth == 0 || board.getWinner() == board.AGENT_ID || board.getWinner() == (1-board.AGENT_ID) || board.getWinner()==Board.DRAW){
-            double result =  evaluate(board);
-            System.out.println("RESULTS:");
-            System.out.println(result);
-            return result;
-        }
-        if(isMax){
-            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
-                SaboteurMove move = a.next();
-                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
-                child.processMove(move);
-                score = minimax(depth-1, child, alpha,beta,false);
-                if(score> alpha){
-                    alpha = score;
-                }
-                if(alpha>=beta){
-                    break;
-                }
+        //开放形tile加分：
+        String[] opening = {"0","0_flip", "5","5_flip","6","6_flip","7","7_flip","8","8_flip", "9","9_flip","10","10_flip"};
+        for(String o : opening){
+            if(o.equals(name)) {
+                cardScore += 1;
+                break;
             }
-            return alpha;
-        }else{
-            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
-                SaboteurMove move = a.next();
-                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
-                child.processMove(move);
-                score = minimax(depth-1, child, alpha,beta,true);
-                if(score < beta){
-                    beta = score;
-                }
-                if(alpha>=beta){
-                    break;
-                }
-            }
-            return beta;
         }
-    }
 
+        if(name.equals("Malus")) {
+            return 100;
+        }
+        if(name.equals("Map")) {
+            return 500;
+        }
+        if(name.equals("Bonus")) {
+            return 1000;
+        }
+        if(name.equals("Drop")) {
+            return -1000;
+        }
+        if(name.equals("Destroy")) {
+            return 0;
+        }
+        return disToEntrance+cardScore;
+    }
 
 
 
@@ -167,6 +131,82 @@ public class StudentPlayer extends SaboteurPlayer {
         return score1+score2+score3+score4;
     }
 
+    //this filtermoves will help prune branching factors. PUT PRIORITY For must use cards.
+
+    public static ArrayList<SaboteurMove>  filterMoves(ArrayList<SaboteurMove> allMoves, int factor){ //moves to be pruned. factor to determine #of moves stored
+        ArrayList<SaboteurMove> filter= new ArrayList<SaboteurMove>();
+        int counts =0 ;
+        Collections.sort(allMoves, new Comparator<SaboteurMove>() {   //sort from largest to smallest
+            @Override
+            public int compare(SaboteurMove o1, SaboteurMove o2) {
+                int r1 = evalMove(o1);
+                int r2 = evalMove(o2);
+                //as reverse order
+                if(r2>r1){ return 1; }
+                else if(r2<r1){ return -1; }
+                return 0;
+            }
+        });
+
+        for(SaboteurMove move : allMoves ){
+            int movePts = evalMove(move);
+            if(movePts == 1000 || movePts == 500 || movePts ==100 ){ //priority given to Bonus, Map, Malus
+                filter.add(move);                                   //If a priority Move found, filter will return with size =1
+                return filter;
+            }else if(movePts>=0){
+                filter.add(move);
+                counts++;
+
+            }else if(counts<factor){ //to avoid the case where we pruned all tiles<0.
+                filter.add(move);
+                counts++;
+            }
+            if(counts==factor){ break; } //when max number of factors achieved
+        }
+        return filter;
+    }
+
+
+
+
+    public static double minimax(int depth, SaboteurBoardStateCopy board, double alpha, double beta, boolean isMax, int factor){
+        double score;
+        ArrayList<SaboteurMove> allMoves = student_player.StudentPlayer.filterMoves(board.getAllLegalMoves() , factor); //factors also decide the size of board
+        //if leaf node:
+        if(depth == 0 || board.getWinner() == board.AGENT_ID || board.getWinner() == (1-board.AGENT_ID) || board.getWinner()==Board.DRAW){
+            double result =  evaluate(board);
+            return result;
+        }
+        if(isMax){
+            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
+                SaboteurMove move = a.next();
+                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
+                child.processMove(move);
+                score = minimax(depth-1, child, alpha,beta,false, factor); //next round is opponent
+                if(score> alpha){
+                    alpha = score;
+                }
+                if(alpha>=beta){
+                    break;
+                }
+            }
+            return alpha;
+        }else{ //opponent play
+            for(Iterator<SaboteurMove> a = allMoves.iterator(); a.hasNext();){
+                SaboteurMove move = a.next();
+                SaboteurBoardStateCopy child = new SaboteurBoardStateCopy(board);
+                child.processMove(move);
+                score = minimax(depth-1, child, alpha,beta,true,factor);//next round is us
+                if(score < beta){
+                    beta = score;
+                }
+                if(alpha>=beta){
+                    break;
+                }
+            }
+            return beta;
+        }
+    }
 
 
     /**
@@ -178,58 +218,48 @@ public class StudentPlayer extends SaboteurPlayer {
         // You probably will make separate functions in MyTools.
         // For example, maybe you'll need to load some pre-processed best opening
         // strategies...
-        MyTools.getSomething();
-//        MyTools p1= new MyTools();
-        Move myMove = null;
-        // Is random the best you can do?
-        ArrayList<Double> scoreOFMoves = new ArrayList<>();
-        int i=0;
-
-        double max=Integer.MIN_VALUE;
-        for (SaboteurMove m : board.getAllLegalMoves()) {
-            //System.out.println("Chose the move: "+ m.toPrettyString());
-            SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
-
-            if (!sbsc.isLegal(m)) {
-                System.out.println("illegal");
-                continue;
-            }
-            sbsc.processMove(m);
-            double curr = student_player.StudentPlayer.evaluate(sbsc);
-            if(max< student_player.StudentPlayer.evaluate(sbsc)){
-                max = curr;
-                System.out.println(max);
-                myMove = m;
-            };
-
+        ArrayList<SaboteurMove> legalMovesPruned= filterMoves(board.getAllLegalMoves(), 10); //initial size 10;
+        if(legalMovesPruned.size()==1){
+            System.out.println("Has pruned");
+            System.out.println(legalMovesPruned.get(0).toPrettyString());
+            return legalMovesPruned.get(0);  //return the first move. (must be bonus, map... )
         }
-        return myMove;
 
+        SaboteurMove resultMove = legalMovesPruned.get(0); //for base case if no moves are found.
+
+        double max=Integer.MIN_VALUE;       //finds the maxvalue node
+        for (SaboteurMove m : legalMovesPruned ) {
+            //System.out.println("Chose the move: "+ m.toPrettyString());
+            SaboteurBoardStateCopy copy = new SaboteurBoardStateCopy(board);
+            if (copy.isLegal(m)) {
+                copy.processMove(m); //we move, our current state becomes the root
+                double value = minimax(4,copy,Integer.MIN_VALUE,Integer.MAX_VALUE,false,6);
+                if(value>max){ //choose the max value
+                    max = value;
+                    resultMove = m;
+                    System.out.println("Has pruned");
+                    System.out.println(m.toPrettyString());
+
+                    if (m.getCardPlayed() instanceof SaboteurTile){
+                        ((SaboteurTile) m.getCardPlayed()).showCard();
+                    }
+                }
+            }
+        }
+        return resultMove;
     }
 
     public static void main(String args[]){
-        SaboteurBoardState newboard = new SaboteurBoardState();
-        student_player.StudentPlayer a = new student_player.StudentPlayer();
-        newboard.processMove( newboard.getRandomMove());
-        double max = Integer.MIN_VALUE;
-        SaboteurMove bestmove = null;
-        for(SaboteurMove temp: newboard.getAllLegalMoves()){
-            System.out.println(temp.toPrettyString());
-            SaboteurBoardStateCopy copy  = new SaboteurBoardStateCopy(newboard);
-//            copy.processMove(temp);
-            System.out.println("Minimax results:");
-            double curr = student_player.StudentPlayer.minimax(1,copy,Integer.MIN_VALUE,Integer.MAX_VALUE,true);
-            System.out.println(curr);
-            if(curr>max){
-                max = curr;
-                bestmove = temp;
-            }
-        }
-        System.out.println();
-
-        System.out.println(bestmove.toPrettyString());
-        System.out.println(newboard.getAllLegalMoves().size());
-
+//        SaboteurBoardState newboard = new SaboteurBoardState();
+//        newboard.processMove(newboard.getRandomMove());
+//        StudentPlayer a = new StudentPlayer();
+//        newboard.processMove( newboard.getRandomMove());
+//        double max = Integer.MIN_VALUE;
+//        SaboteurMove bestmove = null;
+//        for(SaboteurMove temp: newboard.getAllLegalMoves()){
+//            System.out.println(temp.toPrettyString());
+//            SaboteurBoardStateCopy copy  = new SaboteurBoardStateCopy(newboard);
+//        }
 
     }
 

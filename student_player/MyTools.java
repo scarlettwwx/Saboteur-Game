@@ -262,40 +262,40 @@ public class MyTools {
 
 
 
-    public static void main(String args[]){
+//    public static void main(String args[]){
+//
+//        SaboteurBoardState board = new SaboteurBoardState();
+//        // board.printBoard();  //with search board
+//
+//        System.out.println("board Before processmove:");
+//        board.printBoard();
+//
+//
+//        System.out.println("Before Process move");
+////        for (student_player.Path a: student_player.MyTools.searchBoard()){
+////            System.out.println(a);
+////        }
+//        double c = StudentPlayer.evaluate(board);
+//        System.out.println("Score of this board before process:" + c);
+//
+//        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
+//        int i=0;
+//        SaboteurBoardStateCopy sb = new SaboteurBoardStateCopy(board);
+//
+//        for (SaboteurMove m : sb.getAllLegalMoves()) {
+//            System.out.println("Chose the move: "+ m.toPrettyString());
+//            SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
+//            //sbsc.printBoard();
+//            if (!sbsc.isLegal(m)) {
+//                System.out.println("illegal");
+//                continue;
+//            }
+//            sbsc.processMove(m);
+//
+//            scoreOFMoves[i]= StudentPlayer.evaluate(sbsc);
+//            System.out.println("score is:"+ scoreOFMoves[i]);
+//            i++;
 
-        SaboteurBoardState board = new SaboteurBoardState();
-        // board.printBoard();  //with search board
-
-        System.out.println("board Before processmove:");
-        board.printBoard();
-
-
-        System.out.println("Before Process move");
-//        for (student_player.Path a: student_player.MyTools.searchBoard()){
-//            System.out.println(a);
-//        }
-        double c = StudentPlayer.evaluate(board);
-        System.out.println("Score of this board before process:" + c);
-
-        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
-        int i=0;
-        SaboteurBoardStateCopy sb = new SaboteurBoardStateCopy(board);
-
-        for (SaboteurMove m : sb.getAllLegalMoves()) {
-            System.out.println("Chose the move: "+ m.toPrettyString());
-            SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
-            //sbsc.printBoard();
-            if (!sbsc.isLegal(m)) {
-                System.out.println("illegal");
-                continue;
-            }
-            sbsc.processMove(m);
-
-            scoreOFMoves[i]= StudentPlayer.evaluate(sbsc);
-            System.out.println("score is:"+ scoreOFMoves[i]);
-            i++;
-        }
 
 
 /*
@@ -313,13 +313,7 @@ public class MyTools {
         }
 
         System.out.println("board After processmove:");
-        board.printBoard();*/
-
-
-
-
-    }
-
+        board.printBoard();} }*/
 }
 
 
