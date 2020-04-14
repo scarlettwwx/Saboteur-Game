@@ -205,7 +205,6 @@ public class SaboteurBoardStateCopy extends BoardState {
         ArrayList<SaboteurCard> pCards = this.getCurrentPlayerCards();
         ArrayList<SaboteurCard> deck = this.Deck;
         //Collections.shuffle(deck);
-        //之后shuffle也可以
 
         //remove player's hand from deck
         for(SaboteurCard card:pCards){
