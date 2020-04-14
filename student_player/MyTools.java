@@ -35,12 +35,13 @@ public class MyTools {
     public static void initVisited(){
         for(int i = 0; i<BOARD_SIZE;i++){  //initialize visited array.
             for(int j=0;j<BOARD_SIZE;j++){
-                if(i>=36 && i<=38){
-                    if(j>=9 && j<=11){ visited[i][j]=true; }
-                    else if(j>=15 && j<=17){ visited[i][j]=true; }
-                    else if(j>=21 && j<=23){ visited[i][j]=true; }
-                    else{visited[i][j]=false;}
-                } else{ visited[i][j]=false; }
+//                if(i>=36 && i<=38){
+//                    if(j>=9 && j<=11){ visited[i][j]=true; }
+//                    else if(j>=15 && j<=17){ visited[i][j]=true; }
+//                    else if(j>=21 && j<=23){ visited[i][j]=true; }
+//                    else{visited[i][j]=false;}
+//                } else{  visited[i][j]=false; }
+                visited[i][j]=false;
             }
         }
 
@@ -63,21 +64,10 @@ public class MyTools {
         student_player.MyTools.aBoard = pBoard;
         initVisited(); //needs it as to initialize visited array everytime.
         ArrayList<student_player.Path> arr =new ArrayList<student_player.Path>();
-        for(int i=0;i<BOARD_SIZE;i++){
-            for(int j=0;j<BOARD_SIZE;j++){
-                if(aBoard[i][j]==1 && !visited[i][j]){
-                    student_player.Path temp = new student_player.Path();
-                    if(i==2 && j==2){  //if we found it at origin
-                        temp.startsAtOrigin=true;
-                    }
-                    int numOnes = temp.dfs(i,j);
-                    temp.numOnes = numOnes;  //updates number of one found.
-                    if(numOnes>3){
-                        arr.add(temp);   //adds into the list
-                    }
-                }
-            }
-        }
+        student_player.Path temp = new student_player.Path();
+        temp.numOnes = temp.dfs(16,16);
+        arr.add(temp);
+        System.out.println(temp);
         return arr;
     }
 
@@ -149,28 +139,40 @@ public class MyTools {
         //if three hidden objectives are not visible;
         if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("3 Hidden");
         }
         //if one nugget is visible or the other two hidden1/2 are visible
-        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, leftHidden);
+            System.out.println("1st is nugget");
         }
-        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, middleHidden);
+            System.out.println("2nd is nugget");
         }
-        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, rightHidden);
+            System.out.println("3rd is nugget");
         }
         //if one hidden is visible:
-        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+        else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("1st Hidden visible");
+
         }
-        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+        else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("2nd Hidden visible");
+
         }
-        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+        else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
+            System.out.println("3rd Hidden visible");
+
         }
-        return (credit / temp2.size());
+        int numOnes = temp2.get(0).numOnes;
+        System.out.println(credit);
+        return 10*credit + numOnes;
     }
 
     //OVERLOADING
@@ -192,28 +194,40 @@ public class MyTools {
         //if three hidden objectives are not visible;
         if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("3 Hidden");
         }
         //if one nugget is visible or the other two hidden1/2 are visible
-        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, leftHidden);
+            System.out.println("1st is nugget");
         }
-        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, middleHidden);
+            System.out.println("2nd is nugget");
         }
-        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, rightHidden);
+            System.out.println("3rd is nugget");
         }
         //if one hidden is visible:
-        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+        else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("1st Hidden visible");
+
         }
-        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+        else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
+            System.out.println("2nd Hidden visible");
+
         }
-        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+        else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
+            System.out.println("3rd Hidden visible");
+
         }
-        return (credit / temp2.size());
+        int numOnes = temp2.get(0).numOnes;
+        System.out.println(credit);
+        return 10*credit + numOnes;
     }
 
 
@@ -320,7 +334,6 @@ public class MyTools {
 class Path{
     public int numOnes;
     public int[] deepestEnd={0,0};
-    public boolean startsAtOrigin;
     public int openEnds = 0;
 
     public static final int[] dx = {1,0,0,-1};
@@ -331,7 +344,6 @@ class Path{
         return "Path{" +
                 "numOnes=" + numOnes +
                 ", deepestEnd=" + Arrays.toString(deepestEnd) +
-                ", startsAtOrigin=" + startsAtOrigin +
                 ", openEnds=" + openEnds +
                 '}';
     }
@@ -355,10 +367,8 @@ class Path{
                     temp1.deepestEnd=coordinate;
                     student_player.Path temp2 = new student_player.Path();
                     temp2.deepestEnd=deepestEnd;
-
                     int l1dis = student_player.MyTools.disToThreeHidden(temp1);
                     int l2dis = student_player.MyTools.disToThreeHidden(temp2);
-
                     if(l1dis > l2dis ){
                         deepestEnd[0]=i;
                         deepestEnd[1]=j;
@@ -370,9 +380,6 @@ class Path{
         }else{ //if another 1 has been found
             student_player.MyTools.visited[i][j] = true;
             int ans = 1;
-            if(i==16 && j==16){  //if we found it at origin
-                startsAtOrigin=true;
-            }
             for (int d=0; d<4;d++){
                 ans = ans + dfs(i+dx[d],j+dy[d]);
             }

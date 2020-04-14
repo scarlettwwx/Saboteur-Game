@@ -17,10 +17,10 @@ import java.util.function.UnaryOperator;
 public class SaboteurBoardStateCopy extends BoardState {
     public static final int BOARD_SIZE = 14;
     public static final int originPos = 5;
-
     public static final int EMPTY = -1;
     public static final int TUNNEL = 1;
     public static final int WALL = 0;
+    public static int AGENT_ID; //a constant, store agent's id.
 
     private static int FIRST_PLAYER = 1;
 
@@ -37,7 +37,7 @@ public class SaboteurBoardStateCopy extends BoardState {
 
     private ArrayList<SaboteurCard> Deck; //deck form which player pick
     public static final int[][] hiddenPos = {{originPos+7,originPos-2},{originPos+7,originPos},{originPos+7,originPos+2}};
-    protected SaboteurTile[] hiddenCards = new SaboteurTile[3];
+    protected static SaboteurTile[] hiddenCards = new SaboteurTile[3];
     private boolean[] hiddenRevealed = {false,false,false}; //whether hidden at pos1 is revealed, hidden at pos2 is revealed, hidden at pos3 is revealed.
 
 
@@ -129,17 +129,19 @@ public class SaboteurBoardStateCopy extends BoardState {
         System.arraycopy(pbs.player2hiddenRevealed, 0, this.player2hiddenRevealed, 0, pbs.player2hiddenRevealed.length);
         System.arraycopy(pbs.hiddenRevealed, 0, this.hiddenRevealed, 0, pbs.hiddenRevealed.length);
 
+        //Make it static would change all hidden cards right?
         // Problem: we also need to make a copy of the private array where hiddenCards are stored.... So we make it protected!
-        this.hiddenCards = new SaboteurTile[pbs.hiddenCards.length];
-        for (int i = 0; i < pbs.hiddenCards.length; i++) {
-            this.hiddenCards[i] = new SaboteurTile(pbs.hiddenCards[i].getName().split(":")[1]); //Note: we might encounter a problem here, and should define card as cloneable
-        }
+//        this.hiddenCards = new SaboteurTile[pbs.hiddenCards.length];
+//        for (int i = 0; i < pbs.hiddenCards.length; i++) {
+//            this.hiddenCards[i] = new SaboteurTile(pbs.hiddenCards[i].getName().split(":")[1]); //Note: we might encounter a problem here, and should define card as cloneable
+//        }
 
         this.player1nbMalus = pbs.player1nbMalus;
         this.player2nbMalus = pbs.player2nbMalus;
         this.winner = pbs.winner;
         this.turnPlayer = pbs.turnPlayer;
         this.turnNumber = pbs.turnNumber;
+        this.AGENT_ID = pbs.AGENT_ID;
     }
 
 
@@ -163,18 +165,23 @@ public class SaboteurBoardStateCopy extends BoardState {
             this.turnPlayer=0;
             this.player2Cards = pbs.getCurrentPlayerCards();  //get agent's hand
             System.arraycopy(opponentReveal, 0, this.player1hiddenRevealed, 0, opponentReveal.length);
+            AGENT_ID=0;
         }
         else{  //if I am the first player
             this.turnPlayer=1;
             this.player1Cards = pbs.getCurrentPlayerCards();  //get agent's hand
             System.arraycopy(opponentReveal, 0, this.player2hiddenRevealed, 0, opponentReveal.length);
+            AGENT_ID=1;
+
         }
 
         int numOfHidden = setTrackHiddenstatus(hiddenboard); //updates hiddenCards,hiddenstatus, return non-hidden cards number
 
+        System.out.println("Hidden cards 3,5,7:");
+        this.hiddenCards[0].showCard();
+        this.hiddenCards[1].showCard();
+        this.hiddenCards[2].showCard();
 
-        //先默认hiddenreview是false吧，感觉只有当我们找到correct path 才会变成true。这种时候都赢了
-        //所以下面的copy也不需要了
 //      ArrayList<SaboteurCard> hand = this.turnPlayer==1? this.player1Cards : this.player2Cards;
         this.player1nbMalus = pbs.getNbMalus(1);
         this.player2nbMalus = pbs.getNbMalus(0);
@@ -183,7 +190,7 @@ public class SaboteurBoardStateCopy extends BoardState {
 
         guessCurrentDeck(hiddenboard,numOfHidden);
 
-        CreateOpponentHand();    //随机抽牌给player2 or player1
+        CreateOpponentHand();
         this.intBoard = new int[BOARD_SIZE*3][BOARD_SIZE*3];
         getIntBoard();
         //?????
@@ -297,12 +304,9 @@ public class SaboteurBoardStateCopy extends BoardState {
         list.add("hidden2");
         list.add("nugget");
         //generates hiddenCards
-        Random startRand = new Random();
-        for(int i = 0; i < 3; i++){
-            int idx = startRand.nextInt(list.size());
-            this.board[hiddenPos[i][0]][hiddenPos[i][1]] = new SaboteurTile(list.remove(idx));
-            this.hiddenCards[i] = this.board[hiddenPos[i][0]][hiddenPos[i][1]];
-        }
+        this.hiddenCards[0] = new SaboteurTile("hidden1");
+        this.hiddenCards[1] = new SaboteurTile("nugget");
+        this.hiddenCards[2] = new SaboteurTile("hidden2");
 
         int sum=0; //sum of unhidden cards
         if(!tiles[12][3].getIdx().equals("8")) {
@@ -328,11 +332,12 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
             sum++;
 
-            if (tiles[12][5].getIdx().equals("nugget")) {
-                this.hiddenCards[1] =  tiles[12][5];
-                this.hiddenCards[0] =  new SaboteurTile("hidden1");
-                this.hiddenCards[2] =  new SaboteurTile("hidden2");
-
+            if (!tiles[12][5].getIdx().equals("nugget")) {//when we know the middle and right one is not nugget
+                if(!tiles[12][7].getIdx().equals("8")&& !tiles[12][7].getIdx().equals("nugget")){
+                    this.hiddenCards[0] =  new SaboteurTile("nugget");
+                    this.hiddenCards[1] =  new SaboteurTile("hidden1");
+                    this.hiddenCards[2] =  new SaboteurTile("hidden1");
+                }
             }
         }
         if(!tiles[12][7].getIdx().equals( "8")){
@@ -350,6 +355,10 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
         }
         //if one nugget is visible or the other two hidden1/2 are visible
+        this.board[12][3] =  this.hiddenCards[0];
+        this.board[12][5] =  this.hiddenCards[1];
+        this.board[12][7] =  this.hiddenCards[2];
+
         return sum;
     }
 
@@ -376,10 +385,9 @@ public class SaboteurBoardStateCopy extends BoardState {
         }
     }
 
-//不知道啥用，留个signature吧。
+
 //    public SaboteurTile[][] getBoardForDisplay(){
 
-    //测试的时候可能会用吧
     public ArrayList<SaboteurCard> getPlayerCardsForDisplay(int playernb){
         if(playernb==turnPlayer){
             if(turnPlayer==1){
@@ -979,7 +987,7 @@ public class SaboteurBoardStateCopy extends BoardState {
             visited.add(visitingPos);
             if(usingCard) addUnvisitedNeighborToQueue(visitingPos,queue,visited,BOARD_SIZE,usingCard);
             else addUnvisitedNeighborToQueue(visitingPos,queue,visited,BOARD_SIZE*3,usingCard);
-            System.out.println(queue.size());
+//            System.out.println(queue.size());
         }
         return false;
     }
@@ -1028,8 +1036,8 @@ public class SaboteurBoardStateCopy extends BoardState {
             if(!this.hiddenRevealed[currentTargetIdx]) {  //verify that the current target has not been already discovered. Even if there is a destruction event, the target keeps being revealed!
 
                 if (cardPath(originTargets, targetPos, true)) { //checks that there is a cardPath
-                    System.out.println("card path found"); //todo remove
-                    this.printBoard();
+//                    System.out.println("card path found"); //todo remove
+//                    this.printBoard();
                     //next: checks that there is a path of ones.
                     ArrayList<int[]> originTargets2 = new ArrayList<>();
                     //the starting points
@@ -1041,7 +1049,7 @@ public class SaboteurBoardStateCopy extends BoardState {
                     //get the target position in 0-1 coordinate
                     int[] targetPos2 = {targetPos[0]*3+1, targetPos[1]*3+1};
                     if (cardPath(originTargets2, targetPos2, false)) {
-                        System.out.println("0-1 path found");
+//                        System.out.println("0-1 path found");
 
                         this.hiddenRevealed[currentTargetIdx] = true;
                         this.player1hiddenRevealed[currentTargetIdx] = true;
@@ -1049,7 +1057,7 @@ public class SaboteurBoardStateCopy extends BoardState {
                         atLeastOnefound =true;
                     }
                     else{
-                        System.out.println("0-1 path was not found");
+//                        System.out.println("0-1 path was not found");
                     }
                 }
             }
@@ -1142,35 +1150,35 @@ public class SaboteurBoardStateCopy extends BoardState {
     }
 
     public static void main(String[] args) {
-        ArrayList<SaboteurCard> deck =new ArrayList<SaboteurCard>();
-        String[] tiles ={"0","1","2","3","4","5"};
-        for(int i=0;i<tiles.length;i++){
-            deck.add(new SaboteurTile(tiles[i]));
-        }
-
-        SaboteurBoardState tryy1 = new SaboteurBoardState();
-        student_player.SaboteurBoardStateCopy copy2 = new student_player.SaboteurBoardStateCopy(tryy1);
-
-        tryy1.printBoard();
-        tryy1.printBothHands();
-
-        copy2.printBoard();
-        copy2.printBothHands();
-
-        tryy1.processMove(tryy1.getRandomMove());
-        tryy1.processMove(tryy1.getRandomMove());
-
-        tryy1.printBoard();
-        tryy1.printBothHands();
-
-        copy2.printBoard();
-        copy2.printBothHands();
-
-        student_player.SaboteurBoardStateCopy copy3= new student_player.SaboteurBoardStateCopy(tryy1);
-
-        copy3.printBoard();
-        copy3.printBothHands();
-
+//        ArrayList<SaboteurCard> deck =new ArrayList<SaboteurCard>();
+//        String[] tiles ={"0","1","2","3","4","5"};
+//        for(int i=0;i<tiles.length;i++){
+//                deck.add(new SaboteurTile(tiles[i]));
+//        }
+//
+//        SaboteurBoardState tryy1 = new SaboteurBoardState();
+//        SaboteurBoardStateCopy copy2 = new SaboteurBoardStateCopy(tryy1);
+//
+//        tryy1.printBoard();
+//        tryy1.printBothHands();
+//
+//        copy2.printBoard();
+//        copy2.printBothHands();
+//
+//        tryy1.processMove(tryy1.getRandomMove());
+//        tryy1.processMove(tryy1.getRandomMove());
+//
+//        tryy1.printBoard();
+//        tryy1.printBothHands();
+//
+//        copy2.printBoard();
+//        copy2.printBothHands();
+//
+//        SaboteurBoardStateCopy copy3= new SaboteurBoardStateCopy(tryy1);
+//
+//        copy3.printBoard();
+//        copy3.printBothHands();
+//
 
 
     }

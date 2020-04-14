@@ -31,15 +31,25 @@ public class StudentPlayer extends SaboteurPlayer {
 
     public static int evalMove (SaboteurMove sm) {
         int[] posi=sm.getPosPlayed();
-        int disToEntrance = (posi[0]+posi[1]-10); // 往entrance之上放减一点分
+        int disToEntrance = (posi[0]+posi[1]-10);
         int cardScore=0;
         String name = sm.getCardPlayed().getName();
-
-        //开放形tile加分：
+        if(sm.getCardPlayed() instanceof SaboteurTile){
+            name = ((SaboteurTile) sm.getCardPlayed()).getIdx();
+        }
         String[] opening = {"0","0_flip", "5","5_flip","6","6_flip","7","7_flip","8","8_flip", "9","9_flip","10","10_flip"};
+        String[] closing = {"1","1_flip", "2","2_flip","3","3_flip","4","4_flip","11","11_flip", "13","13_flip","14","14_flip","15","15_flip"};
+
         for(String o : opening){
             if(o.equals(name)) {
-                cardScore += 1;
+                cardScore += 20;
+                break;
+            }
+        }
+
+        for(String o : closing){
+            if(o.equals(name)) {
+                cardScore -= 2000;
                 break;
             }
         }
@@ -63,72 +73,93 @@ public class StudentPlayer extends SaboteurPlayer {
     }
 
 
-
     //1. evaluate on boardState
     public static double evaluate(SaboteurBoardState pBoard){
         int player_id = pBoard.getTurnPlayer();
         //needs to verify again
-        if(pBoard.getWinner() == player_id){ return Integer.MAX_VALUE -1;}  //first player is us?
-        else if(pBoard.getWinner() == 1-player_id){ return Integer.MIN_VALUE + 1;}  //second player
+        if(pBoard.getWinner() ==1 - player_id){
+            System.out.println("Total Score:");
+            System.out.println(Integer.MAX_VALUE -1);
+            return Integer.MAX_VALUE -1;}  //first player is us?
+        else if(pBoard.getWinner() == player_id){
+
+            System.out.println("Total Score:");
+            System.out.println(Integer.MIN_VALUE +1);
+            return Integer.MIN_VALUE + 1;}  //second player
         else if(pBoard.getWinner() == Board.DRAW){ return 0.0;} //a tie
 
-        boolean exist = player_id==0;
-        double score1 = 3* MyTools.disToThreeHidden(pBoard);
-        double score2 = MyTools.openEndsWholeBoard(pBoard);
+        double score1 = MyTools.disToThreeHidden(pBoard);
 
-        SaboteurTile[][] tiles= pBoard.getHiddenBoard();
-        int numOfHidden = 0;
-        int nugget= 0;
-        int i =0;
+//        double score2 = MyTools.openEndsWholeBoard(pBoard);
+        double score3 = pBoard.getNbMalus(pBoard.getTurnPlayer());
 
-        while(i<3){
-            int j = 3 + i*2;
-            //if the first card is hidden1 or 2.
-            if(tiles[12][j].getIdx().equals("hidden1") || tiles[12][j].getIdx().equals("hidden2") ){
-                numOfHidden++;
-            }else if(tiles[12][j].getIdx().equals("nugget")){
-                nugget++;
-            }
-            i++;
-        }
 
-        double score3 = numOfHidden*10 + nugget*30; //check hidden cards
+        //number of 1s
 
-        double score4 = pBoard.getNbMalus(pBoard.getTurnPlayer());
+//        SaboteurTile[][] tiles= pBoard.getHiddenBoard();
+//        int numOfHidden = 0;
+//        int nugget= 0;
+//        int i =0;
+//
+//        while(i<3){
+//            int j = 3 + i*2;
+//            //if the first card is hidden1 or 2.
+//            if(tiles[12][j].getIdx().equals("hidden1") || tiles[12][j].getIdx().equals("hidden2") ){
+//                numOfHidden++;
+//            }else if(tiles[12][j].getIdx().equals("nugget")){
+//                nugget++;
+//            }
+//            i++;
+//        }
 
-        return score1+score2+score3+score4;
+//        double score3 = numOfHidden*10 + nugget*30; //check hidden cards
+
+        System.out.println("Score 1: DFS+numOnes:");
+        System.out.println(score1);
+
+//        System.out.println("Score 2: Open Ends:");
+//        System.out.println(score2);
+
+        System.out.println("Score 2: Malus Value:");
+        System.out.println(score3);
+
+        System.out.println("Total Score:");
+        System.out.println(score1+score3);
+        return score1+score3;
     }
 
     //2. evaluate on the copy board:
     public static double evaluate(SaboteurBoardStateCopy pBoard){
         //needs to verify again
         int player_id = pBoard.getTurnPlayer();
-        if(pBoard.getWinner() == player_id){ return Integer.MAX_VALUE -1;}  //first player is us?
-        else if(pBoard.getWinner() == 1-player_id){ return Integer.MIN_VALUE + 1;}  //second player
+        if(pBoard.getWinner() ==1 - player_id){
+            System.out.println("Total Score:");
+            System.out.println(Integer.MAX_VALUE -1);
+            return Integer.MAX_VALUE -1;}  //first player is us?
+        else if(pBoard.getWinner() == player_id){
+
+            System.out.println("Total Score:");
+            System.out.println(Integer.MIN_VALUE +1);
+            return Integer.MIN_VALUE + 1;}  //second player
         else if(pBoard.getWinner() == Board.DRAW){ return 0.0;} //a tie
 
-        boolean exist = player_id==0;
-        double score1 = 3*MyTools.disToThreeHidden(pBoard);
-        double score2 = MyTools.openEndsWholeBoard(pBoard);
-        SaboteurTile[][] tiles= pBoard.getHiddenBoard();
-        int numOfHidden = 0;
-        int nugget= 0;
-        int i =0;
-        while(i<3){
-            int j = 3 + i*2;
-            //if the first card is hidden1 or 2.
-            if(tiles[12][j].getIdx().equals("hidden1") || tiles[12][j].getIdx().equals("hidden2") ){
-                numOfHidden++;
-            }else if(tiles[12][j].getIdx().equals("nugget")){
-                nugget++;
-            }
-            i++;
-        }
-        double score3 = numOfHidden*10 + nugget*30; //check hidden cards
+        double score1 = MyTools.disToThreeHidden(pBoard);
 
-        double score4 = pBoard.getNbMalus(pBoard.getTurnPlayer());
+//        double score2 = MyTools.openEndsWholeBoard(pBoard);
+        double score3 = pBoard.getNbMalus(pBoard.getTurnPlayer());
 
-        return score1+score2+score3+score4;
+        System.out.println("Score 1: DFS+numOnes:");
+        System.out.println(score1);
+
+//        System.out.println("Score 2: Open Ends:");
+//        System.out.println(score2);
+
+        System.out.println("Score 3: Malus Value:");
+        System.out.println(score3);
+
+        System.out.println("Total Score:");
+        System.out.println(score1+score3);
+        return score1+score3;
     }
 
     //this filtermoves will help prune branching factors. PUT PRIORITY For must use cards.
@@ -162,6 +193,14 @@ public class StudentPlayer extends SaboteurPlayer {
                 counts++;
             }
             if(counts==factor){ break; } //when max number of factors achieved
+        }
+        System.out.println("Moves Pruned:");
+        for( SaboteurMove a :filter){
+            System.out.println(a.toPrettyString());
+            if(a.getCardPlayed() instanceof SaboteurTile){
+                ((SaboteurTile) a.getCardPlayed()).showCard();
+            }
+            System.out.println(evalMove(a));
         }
         return filter;
     }
@@ -218,7 +257,20 @@ public class StudentPlayer extends SaboteurPlayer {
         // You probably will make separate functions in MyTools.
         // For example, maybe you'll need to load some pre-processed best opening
         // strategies...
-        ArrayList<SaboteurMove> legalMovesPruned= filterMoves(board.getAllLegalMoves(), 10); //initial size 10;
+        System.out.println("  ");
+        System.out.println("This Current board evaluated as: (without moves)");
+        System.out.println( evaluate(board));
+        System.out.println("  ");
+
+        System.out.println("This Current board has legal moves:");
+        for (SaboteurMove m : board.getAllLegalMoves() ) {
+            System.out.println(m.toPrettyString());
+
+        }
+        System.out.println("  ");
+
+
+        ArrayList<SaboteurMove> legalMovesPruned= filterMoves(board.getAllLegalMoves(), 100); //initial size 10;
         if(legalMovesPruned.size()==1){
             System.out.println("Has pruned");
             System.out.println(legalMovesPruned.get(0).toPrettyString());
@@ -231,21 +283,27 @@ public class StudentPlayer extends SaboteurPlayer {
         for (SaboteurMove m : legalMovesPruned ) {
             //System.out.println("Chose the move: "+ m.toPrettyString());
             SaboteurBoardStateCopy copy = new SaboteurBoardStateCopy(board);
+
             if (copy.isLegal(m)) {
                 copy.processMove(m); //we move, our current state becomes the root
-                double value = minimax(4,copy,Integer.MIN_VALUE,Integer.MAX_VALUE,false,6);
+//                double value = minimax(3,copy,Integer.MIN_VALUE,Integer.MAX_VALUE,false,5);
+                System.out.println("this move is:");
+                System.out.println(m.toPrettyString());
+                double value = evaluate(copy); //INIFINITE LOOP
+
+                if (m.getCardPlayed() instanceof SaboteurTile){
+                    ((SaboteurTile) m.getCardPlayed()).showCard();
+                }
+
                 if(value>max){ //choose the max value
                     max = value;
                     resultMove = m;
                     System.out.println("Has pruned");
-                    System.out.println(m.toPrettyString());
 
-                    if (m.getCardPlayed() instanceof SaboteurTile){
-                        ((SaboteurTile) m.getCardPlayed()).showCard();
-                    }
                 }
             }
         }
+        System.out.println("  ");
         return resultMove;
     }
 
