@@ -29,16 +29,22 @@ public class StudentPlayer extends SaboteurPlayer {
         super("260769099");
     }
 
-    public static int evalMove (SaboteurMove sm) {
+   public static int evalMove (SaboteurMove sm) {
         int[] posi=sm.getPosPlayed();
         int disToEntrance = (posi[0]+posi[1]-10);
+        if(posi[0] == 4) { //equivalent as drop
+        		return -10;
+        }
+        if(posi[0] <= 3) { // we would rather drop
+    			return -100;
+        }
         int cardScore=0;
         String name = sm.getCardPlayed().getName();
         if(sm.getCardPlayed() instanceof SaboteurTile){
             name = ((SaboteurTile) sm.getCardPlayed()).getIdx();
         }
         String[] opening = {"0","0_flip", "5","5_flip","6","6_flip","7","7_flip","8","8_flip", "9","9_flip","10","10_flip"};
-        String[] closing = {"1","1_flip", "2","2_flip","3","3_flip","4","4_flip","11","11_flip", "13","13_flip","14","14_flip","15","15_flip"};
+        String[] closing = {"1","1_flip", "2","2_flip","3","3_flip","4","4_flip","11","11_flip","12","12_flip", "13","13_flip","14","14_flip","15","15_flip"};
 
         for(String o : opening){
             if(o.equals(name)) {
@@ -64,13 +70,14 @@ public class StudentPlayer extends SaboteurPlayer {
             return 1000;
         }
         if(name.equals("Drop")) {
-            return -1000;
+            return -10;
         }
         if(name.equals("Destroy")) {
             return 0;
         }
         return disToEntrance+cardScore;
     }
+
 
 
     //1. evaluate on boardState
