@@ -9,7 +9,7 @@ import boardgame.BoardState;
 import student_player.StudentPlayer;
 import java.lang.reflect.Array;
 import java.util.*;
-
+//import Path;
 
 /*
  * aTiles: tiles in the path
@@ -35,12 +35,6 @@ public class MyTools {
     public static void initVisited(){
         for(int i = 0; i<BOARD_SIZE;i++){  //initialize visited array.
             for(int j=0;j<BOARD_SIZE;j++){
-//                if(i>=36 && i<=38){
-//                    if(j>=9 && j<=11){ visited[i][j]=true; }
-//                    else if(j>=15 && j<=17){ visited[i][j]=true; }
-//                    else if(j>=21 && j<=23){ visited[i][j]=true; }
-//                    else{visited[i][j]=false;}
-//                } else{  visited[i][j]=false; }
                 visited[i][j]=false;
             }
         }
@@ -67,7 +61,7 @@ public class MyTools {
         student_player.Path temp = new student_player.Path();
         temp.numOnes = temp.dfs(16,16);
         arr.add(temp);
-        System.out.println(temp);
+//        System.out.println(temp);
         return arr;
     }
 
@@ -139,39 +133,39 @@ public class MyTools {
         //if three hidden objectives are not visible;
         if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("3 Hidden");
+//            System.out.println("3 Hidden");
         }
         //if one nugget is visible or the other two hidden1/2 are visible
         else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, leftHidden);
-            System.out.println("1st is nugget");
+//            System.out.println("1st is nugget");
         }
         else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, middleHidden);
-            System.out.println("2nd is nugget");
+//            System.out.println("2nd is nugget");
         }
         else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, rightHidden);
-            System.out.println("3rd is nugget");
+//            System.out.println("3rd is nugget");
         }
         //if one hidden is visible:
         else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("1st Hidden visible");
+//            System.out.println("1st Hidden visible");
 
         }
         else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("2nd Hidden visible");
+//            System.out.println("2nd Hidden visible");
 
         }
         else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
-            System.out.println("3rd Hidden visible");
+//            System.out.println("3rd Hidden visible");
 
         }
         int numOnes = temp2.get(0).numOnes;
-        System.out.println(credit);
+//        System.out.println(credit);
         return 10*credit + numOnes;
     }
 
@@ -194,39 +188,39 @@ public class MyTools {
         //if three hidden objectives are not visible;
         if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("3 Hidden");
+//            System.out.println("3 Hidden");
         }
         //if one nugget is visible or the other two hidden1/2 are visible
         else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, leftHidden);
-            System.out.println("1st is nugget");
+//            System.out.println("1st is nugget");
         }
         else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, middleHidden);
-            System.out.println("2nd is nugget");
+//            System.out.println("2nd is nugget");
         }
         else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, rightHidden);
-            System.out.println("3rd is nugget");
+//            System.out.println("3rd is nugget");
         }
         //if one hidden is visible:
         else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("1st Hidden visible");
+//            System.out.println("1st Hidden visible");
 
         }
         else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
-            System.out.println("2nd Hidden visible");
+//            System.out.println("2nd Hidden visible");
 
         }
         else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
-            System.out.println("3rd Hidden visible");
+//            System.out.println("3rd Hidden visible");
 
         }
         int numOnes = temp2.get(0).numOnes;
-        System.out.println(credit);
+//        System.out.println(credit);
         return 10*credit + numOnes;
     }
 
@@ -252,83 +246,30 @@ public class MyTools {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
         }
         //if one nugget is visible or the other two hidden1/2 are visible
-        if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, leftHidden);
         }
-        if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, middleHidden);
         }
-        if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+        else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
             credit = -pathToHiddenDis(temp2, rightHidden);
         }
         //if one hidden is visible:
-        if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+        else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, middleHidden)-pathToHiddenDis(temp2, rightHidden);
         }
-        if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+        else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, rightHidden);
         }
-        if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+        else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
             credit = -pathToHiddenDis(temp2, leftHidden)-pathToHiddenDis(temp2, middleHidden);
         }
         return credit;
     }
-
-
-
-//    public static void main(String args[]){
-//
-//        SaboteurBoardState board = new SaboteurBoardState();
-//        // board.printBoard();  //with search board
-//
-//        System.out.println("board Before processmove:");
-//        board.printBoard();
-//
-//
-//        System.out.println("Before Process move");
-////        for (student_player.Path a: student_player.MyTools.searchBoard()){
-////            System.out.println(a);
-////        }
-//        double c = StudentPlayer.evaluate(board);
-//        System.out.println("Score of this board before process:" + c);
-//
-//        double [] scoreOFMoves = new double[board.getAllLegalMoves().size()];
-//        int i=0;
-//        SaboteurBoardStateCopy sb = new SaboteurBoardStateCopy(board);
-//
-//        for (SaboteurMove m : sb.getAllLegalMoves()) {
-//            System.out.println("Chose the move: "+ m.toPrettyString());
-//            SaboteurBoardStateCopy sbsc = new SaboteurBoardStateCopy(board);
-//            //sbsc.printBoard();
-//            if (!sbsc.isLegal(m)) {
-//                System.out.println("illegal");
-//                continue;
-//            }
-//            sbsc.processMove(m);
-//
-//            scoreOFMoves[i]= StudentPlayer.evaluate(sbsc);
-//            System.out.println("score is:"+ scoreOFMoves[i]);
-//            i++;
-
-
-
-/*
-        SaboteurMove move1 = board.getRandomMove();//new SaboteurMove((new SaboteurTile("5")).getFlipped(),5,6,1);
-        System.out.println("Chosed move: " + move1.toPrettyString());
-
-
-        board.processMove(move1);
-        double x = StudentPlayer.evaluate(board);
-        System.out.println("Score of this board:" + x);
-
-        System.out.println("with Process move");
-        for (student_player.Path a: student_player.MyTools.searchBoard()){
-            System.out.println(a);
-        }
-
-        System.out.println("board After processmove:");
-        board.printBoard();} }*/
 }
+
+
 
 
 class Path{
@@ -355,25 +296,25 @@ class Path{
             if ( student_player.MyTools.aBoard[i][j]== -1 ){  //if open ends
                 int row = deepestEnd[0];
                 int col = deepestEnd[1];
-                if (i>row){  //check if it's the deepest.
+//                if (i>row){  //check if it's the deepest.
+//                    deepestEnd[0]=i;
+//                    deepestEnd[1]=j;
+//
+//                }else if(i==row){ //use disToThreeHidden to check who's the deepest end
+                int[] coordinate = new int[2];
+                coordinate[0]=i;
+                coordinate[1]=j;
+                student_player.Path temp1 = new student_player.Path();
+                temp1.deepestEnd=coordinate;
+                student_player.Path temp2 = new student_player.Path();
+                temp2.deepestEnd=deepestEnd;
+                int l1dis = student_player.MyTools.disToThreeHidden(temp1);
+                int l2dis = student_player.MyTools.disToThreeHidden(temp2);
+                if(l1dis > l2dis ){
                     deepestEnd[0]=i;
                     deepestEnd[1]=j;
-
-                }else if(i==row){ //use disToThreeHidden to check who's the deepest end
-                    int[] coordinate = new int[2];
-                    coordinate[0]=i;
-                    coordinate[1]=j;
-                    student_player.Path temp1 = new student_player.Path();
-                    temp1.deepestEnd=coordinate;
-                    student_player.Path temp2 = new student_player.Path();
-                    temp2.deepestEnd=deepestEnd;
-                    int l1dis = student_player.MyTools.disToThreeHidden(temp1);
-                    int l2dis = student_player.MyTools.disToThreeHidden(temp2);
-                    if(l1dis > l2dis ){
-                        deepestEnd[0]=i;
-                        deepestEnd[1]=j;
-                    }
                 }
+
                 openEnds++;
             }
             return 0;
@@ -396,3 +337,6 @@ class Path{
     }
 
 }
+
+
+

@@ -177,12 +177,7 @@ public class SaboteurBoardStateCopy extends BoardState {
 
         int numOfHidden = setTrackHiddenstatus(hiddenboard); //updates hiddenCards,hiddenstatus, return non-hidden cards number
 
-        System.out.println("Hidden cards 3,5,7:");
-        this.hiddenCards[0].showCard();
-        this.hiddenCards[1].showCard();
-        this.hiddenCards[2].showCard();
 
-//      ArrayList<SaboteurCard> hand = this.turnPlayer==1? this.player1Cards : this.player2Cards;
         this.player1nbMalus = pbs.getNbMalus(1);
         this.player2nbMalus = pbs.getNbMalus(0);
         this.winner = pbs.getWinner();
@@ -193,7 +188,6 @@ public class SaboteurBoardStateCopy extends BoardState {
         CreateOpponentHand();
         this.intBoard = new int[BOARD_SIZE*3][BOARD_SIZE*3];
         getIntBoard();
-        //?????
         if(this.turnNumber==0){  //special case when first round.
             this.turnPlayer=pbs.getTurnPlayer();
         }
@@ -308,52 +302,61 @@ public class SaboteurBoardStateCopy extends BoardState {
         this.hiddenCards[2] = new SaboteurTile("hidden2");
 
         int sum=0; //sum of unhidden cards
-        if(!tiles[12][3].getIdx().equals("8")) {
-            if(this.turnPlayer==1){
-                this.player1hiddenRevealed[0] = true;
-            }else{
-                this.player2hiddenRevealed[0] = true; //I'm the second player.
-            }
-            sum++; //this is unhidden , sum++
-
-            if (tiles[12][3].getIdx().equals("nugget")) {
-                this.hiddenCards[0] =  tiles[12][3];
-                this.hiddenCards[1] =  new SaboteurTile("hidden1");
-                this.hiddenCards[2] =  new SaboteurTile("hidden2");
-            }
-        }
-
-        if(!tiles[12][5].getIdx().equals( "8") ){
-            if(this.turnPlayer==1){
-                this.player1hiddenRevealed[0] = true;
-            }else{
-                this.player2hiddenRevealed[0] = true; //I'm the second player.
-            }
-            sum++;
-
-            if (!tiles[12][5].getIdx().equals("nugget")) {//when we know the middle and right one is not nugget
-                if(!tiles[12][7].getIdx().equals("8")&& !tiles[12][7].getIdx().equals("nugget")){
-                    this.hiddenCards[0] =  new SaboteurTile("nugget");
-                    this.hiddenCards[1] =  new SaboteurTile("hidden1");
-                    this.hiddenCards[2] =  new SaboteurTile("hidden1");
-                }
-            }
-        }
-        if(!tiles[12][7].getIdx().equals( "8")){
-            if(this.turnPlayer==1){
-                this.player1hiddenRevealed[0] = true;
-            }else{
-                this.player2hiddenRevealed[0] = true; //I'm the second player.
-            }
-            sum++;
-
-            if (tiles[12][7].getIdx().equals("nugget")) {
-                this.hiddenCards[2] =  tiles[12][7];
-                this.hiddenCards[0] =  new SaboteurTile("hidden1");
-                this.hiddenCards[1] =  new SaboteurTile("hidden2");
-            }
+        //if three hidden objectives are not visible;
+        //do nothing
+        if(tiles[12][3].getIdx() == "8" && tiles[12][5].getIdx() == "8" &&tiles[12][7].getIdx() == "8") {
+            boolean[] temp = {false,false,false};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{  this.player2hiddenRevealed = temp;  }
         }
         //if one nugget is visible or the other two hidden1/2 are visible
+        else if(tiles[12][3].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            boolean[] temp = {true,true,true};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp;  }
+            this.hiddenCards[0] = new SaboteurTile("nugget");
+            this.hiddenCards[1] = new SaboteurTile("hidden1");
+            this.hiddenCards[2] = new SaboteurTile("hidden2");
+            sum = 3;
+        }
+        else if(tiles[12][5].getIdx().equals("nugget") || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][7].getIdx().equals("hidden2")) || (tiles[12][7].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) ) {
+            boolean[] temp = {true,true,true};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp;  }
+            this.hiddenCards[1] = new SaboteurTile("nugget");
+            this.hiddenCards[0] = new SaboteurTile("hidden1");
+            this.hiddenCards[2] = new SaboteurTile("hidden2");
+            sum = 3;
+        }
+        else if(tiles[12][7].getIdx().equals("nugget") || (tiles[12][5].getIdx().equals("hidden1") && tiles[12][3].getIdx().equals("hidden2")) || (tiles[12][3].getIdx().equals("hidden1") && tiles[12][5].getIdx().equals("hidden2")) ) {
+            boolean[] temp = {true,true,true};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp;  }
+            this.hiddenCards[2] = new SaboteurTile("nugget");
+            this.hiddenCards[0] = new SaboteurTile("hidden1");
+            this.hiddenCards[1] = new SaboteurTile("hidden2");
+            sum = 3;
+        }
+        //if one hidden is visible:
+        else if (tiles[12][3].getIdx().equals("hidden1") || tiles[12][3].getIdx().equals("hidden2")) {
+            boolean[] temp = {true,false,false};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp; }
+            sum = 1;
+        }
+        else if (tiles[12][5].getIdx().equals("hidden1") || tiles[12][5].getIdx().equals("hidden2")) {
+            boolean[] temp = {false,true,false};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp; }
+            sum = 1;
+        }
+        else if (tiles[12][7].getIdx().equals("hidden1") || tiles[12][7].getIdx().equals("hidden2")) {
+            boolean[] temp = {false,false,true};
+            if(this.turnPlayer==1){ this.player1hiddenRevealed = temp; }
+            else{ this.player2hiddenRevealed = temp; }
+            sum = 1;
+        }
+
         this.board[12][3] =  this.hiddenCards[0];
         this.board[12][5] =  this.hiddenCards[1];
         this.board[12][7] =  this.hiddenCards[2];
@@ -429,6 +432,18 @@ public class SaboteurBoardStateCopy extends BoardState {
             }
             return p2Cards;
         }
+    }
+
+    //helper method returning hidden cards status from current turnplayer:
+    public boolean[] thisPlayerHiddenStatus(){
+        boolean[] hidden = {false,false,false};
+        if(turnPlayer==1){
+            System.arraycopy(this.player1hiddenRevealed, 0, hidden, 0, 3);
+        }
+        else{
+            System.arraycopy(this.player2hiddenRevealed, 0, hidden, 0, 3);
+        }
+        return hidden;
     }
 
     private int[][] getIntBoard() {
@@ -1149,35 +1164,7 @@ public class SaboteurBoardStateCopy extends BoardState {
     }
 
     public static void main(String[] args) {
-//        ArrayList<SaboteurCard> deck =new ArrayList<SaboteurCard>();
-//        String[] tiles ={"0","1","2","3","4","5"};
-//        for(int i=0;i<tiles.length;i++){
-//                deck.add(new SaboteurTile(tiles[i]));
-//        }
-//
-//        SaboteurBoardState tryy1 = new SaboteurBoardState();
-//        SaboteurBoardStateCopy copy2 = new SaboteurBoardStateCopy(tryy1);
-//
-//        tryy1.printBoard();
-//        tryy1.printBothHands();
-//
-//        copy2.printBoard();
-//        copy2.printBothHands();
-//
-//        tryy1.processMove(tryy1.getRandomMove());
-//        tryy1.processMove(tryy1.getRandomMove());
-//
-//        tryy1.printBoard();
-//        tryy1.printBothHands();
-//
-//        copy2.printBoard();
-//        copy2.printBothHands();
-//
-//        SaboteurBoardStateCopy copy3= new SaboteurBoardStateCopy(tryy1);
-//
-//        copy3.printBoard();
-//        copy3.printBothHands();
-//
+
 
 
     }
